@@ -49,7 +49,6 @@ const ChatPage: React.FC = () => {
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isMobileConversationOpen, setIsMobileConversationOpen] = useState(false);
-  const [error, setError] = useState('');
 
   // Load conversations and buddies
   useEffect(() => {
@@ -176,7 +175,6 @@ const ChatPage: React.FC = () => {
     if (!newMessage.trim() || !selectedConversation || sending) return;
 
     setSending(true);
-    setError('');
 
     // Save message locally first
     const newMsg: Message = {
@@ -405,10 +403,6 @@ const ChatPage: React.FC = () => {
                   )}
                   <div ref={messagesEndRef} />
                 </div>
-
-                {error && (
-                  <div className="px-4 py-2 bg-red-50 border-t border-red-200 text-red-600 text-sm">{error}</div>
-                )}
 
                 <div className="p-4 border-t border-deep-slate/10 bg-white">
                   <form onSubmit={handleSendMessage} className="flex items-end gap-2">
