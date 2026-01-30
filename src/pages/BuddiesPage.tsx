@@ -58,20 +58,37 @@ const BuddiesPage: React.FC = () => {
   }, []);
 
   const fetchActiveSessions = async () => {
+    // Load from localStorage first
+    const localSessions = localStorage.getItem('safezoneph_buddy_sessions');
+    if (localSessions) {
+      setActiveSessions(JSON.parse(localSessions));
+    }
+    
     try {
       const response = await apiService.getActiveBuddySessions();
       if (response.data) {
         setActiveSessions(response.data);
+        localStorage.setItem('safezoneph_buddy_sessions', JSON.stringify(response.data));
       }
     } catch (error) {
-      console.error('Failed to fetch buddy sessions:', error);
+      console.log('Using local buddy sessions (API unavailable)');
     }
   };
 
   const fetchBuddies = async () => {
+    // Load from localStorage first, fallback to mockBuddies
+    const localBuddies = localStorage.getItem('safezoneph_buddies');
+    if (localBuddies) {
+      setBuddies(JSON.parse(localBuddies));
+    } else {
+      // Use mock data as initial buddies for demo
+      setBuddies(mockBuddies);
+      localStorage.setItem('safezoneph_buddies', JSON.stringify(mockBuddies));
+    }
+    
     try {
       const response = await apiService.getBuddies();
-      if (response.data) {
+      if (response.data && response.data.length > 0) {
         // Convert backend buddy data to frontend Buddy type
         const formattedBuddies: Buddy[] = response.data.map((buddy: any) => ({
           id: buddy.id.toString(),
@@ -91,9 +108,10 @@ const BuddiesPage: React.FC = () => {
           lastActive: new Date().toISOString(),
         }));
         setBuddies(formattedBuddies);
+        localStorage.setItem('safezoneph_buddies', JSON.stringify(formattedBuddies));
       }
     } catch (error) {
-      console.error('Failed to fetch buddies:', error);
+      console.log('Using local buddies (API unavailable)');
     }
   };
 

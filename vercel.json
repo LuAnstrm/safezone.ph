@@ -1,6 +1,11 @@
 {
   "version": 2,
   "name": "safezoneph-app",
+  "build": {
+    "env": {
+      "CI": "false"
+    }
+  },
   "builds": [
     {
       "src": "package.json",

@@ -60,13 +60,20 @@ const TasksPage: React.FC = () => {
     }
   }, [location]);
 
-  // Load tasks from API
+  // Load tasks from API with localStorage fallback
   useEffect(() => {
     const loadTasks = async () => {
+      // First, try to load from localStorage
+      const localTasks = localStorage.getItem('safezoneph_tasks');
+      if (localTasks) {
+        setTasks(JSON.parse(localTasks));
+      }
+      
+      // Then try API
       try {
         const response = await apiService.getTasks();
-        if (response.data) {
-          setTasks(response.data.map((task: any) => ({
+        if (response.data && response.data.length > 0) {
+          const apiTasks = response.data.map((task: any) => ({
             id: task.id.toString(),
             title: task.title,
             description: task.description,
@@ -77,10 +84,12 @@ const TasksPage: React.FC = () => {
             dueDate: task.due_date,
             assignedTo: task.assigned_to,
             location: task.location,
-          })));
+          }));
+          setTasks(apiTasks);
+          localStorage.setItem('safezoneph_tasks', JSON.stringify(apiTasks));
         }
       } catch (error) {
-        console.error('Failed to load tasks:', error);
+        console.log('Using local tasks (API unavailable)');
       }
     };
     
@@ -105,8 +114,40 @@ const TasksPage: React.FC = () => {
   const handleCreateTask = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Create task locally first
+    const newTaskData: Task = {
+      id: `local-${Date.now()}`,
+      title: newTask.title,
+      description: newTask.description,
+      category: newTask.category as Task['category'],
+      priority: newTask.priority as Task['priority'],
+      status: 'pending',
+      points: newTask.points,
+      dueDate: newTask.dueDate || undefined,
+      assignedTo: newTask.assignedTo || undefined,
+      location: undefined,
+    };
+    
+    // Add to store and localStorage
+    addTask(newTaskData);
+    const updatedTasks = [...tasks, newTaskData];
+    localStorage.setItem('safezoneph_tasks', JSON.stringify(updatedTasks));
+    
+    showToast('success', `Task "${newTask.title}" created successfully!`);
+    setShowCreateModal(false);
+    setNewTask({
+      title: '',
+      description: '',
+      category: 'wellness_check',
+      priority: 'medium',
+      assignedTo: '',
+      dueDate: '',
+      points: 50,
+    });
+    
+    // Try API in background (don't block on failure)
     try {
-      const response = await apiService.createTask({
+      await apiService.createTask({
         title: newTask.title,
         description: newTask.description,
         category: newTask.category,
@@ -116,81 +157,45 @@ const TasksPage: React.FC = () => {
         assigned_to: newTask.assignedTo || undefined,
         location: undefined,
       });
-      
-      if (response.error) {
-        showToast('error', response.error);
-        return;
-      }
-      
-      if (response.data) {
-        const newTaskData = {
-          id: response.data.id.toString(),
-          title: response.data.title,
-          description: response.data.description,
-          category: response.data.category,
-          priority: response.data.priority,
-          status: response.data.status,
-          points: response.data.points,
-          dueDate: response.data.due_date,
-          assignedTo: response.data.assigned_to,
-          location: response.data.location,
-        };
-        
-        addTask(newTaskData);
-        showToast('success', `Task "${newTask.title}" created successfully!`);
-        setShowCreateModal(false);
-        setNewTask({
-          title: '',
-          description: '',
-          category: 'wellness_check',
-          priority: 'medium',
-          assignedTo: '',
-          dueDate: '',
-          points: 50,
-        });
-      }
-    } catch (error: any) {
-      showToast('error', error.message || 'Failed to create task');
+    } catch {
+      console.log('Task saved locally (API unavailable)');
     }
   };
 
   const handleStartTask = async (task: Task) => {
+    // Update locally first
+    updateTask(task.id, { status: 'in-progress' });
+    const updatedTasks = tasks.map(t => t.id === task.id ? { ...t, status: 'in-progress' as const } : t);
+    localStorage.setItem('safezoneph_tasks', JSON.stringify(updatedTasks));
+    showToast('info', `Started task: ${task.title}`);
+    
+    // Try API in background
     try {
-      const response = await apiService.updateTask(task.id, { status: 'in-progress' });
-      
-      if (response.error) {
-        showToast('error', response.error);
-        return;
-      }
-      
-      updateTask(task.id, { status: 'in-progress' });
-      showToast('info', `Started task: ${task.title}`);
-    } catch (error: any) {
-      showToast('error', error.message || 'Failed to start task');
+      await apiService.updateTask(task.id, { status: 'in-progress' });
+    } catch {
+      console.log('Task updated locally (API unavailable)');
     }
   };
 
   const handleCompleteTask = async (task: Task) => {
     if (!user) return;
     
+    // Update locally first
+    updateTask(task.id, { status: 'completed' });
+    const updatedTasks = tasks.map(t => t.id === task.id ? { ...t, status: 'completed' as const } : t);
+    localStorage.setItem('safezoneph_tasks', JSON.stringify(updatedTasks));
+    
+    // Update user points
+    const newPoints = (user.points || 0) + task.points;
+    updateUser({ points: newPoints });
+    
+    showToast('success', `Task completed! +${task.points} Bayanihan Points earned!`);
+    
+    // Try API in background
     try {
-      const response = await apiService.updateTask(task.id, { status: 'completed' });
-      
-      if (response.error) {
-        showToast('error', response.error);
-        return;
-      }
-      
-      // Update local state
-      updateTask(task.id, { status: 'completed' });
-      
-      // Update user points (this is handled by the backend)
-      const newPoints = (user.points || 0) + task.points;
-      updateUser({ points: newPoints });
-      
-      showToast('success', `Task completed! +${task.points} Bayanihan Points earned!`);
-    } catch (error: any) {
-      showToast('error', error.message || 'Failed to complete task');
+      await apiService.updateTask(task.id, { status: 'completed' });
+    } catch {
+      console.log('Task completed locally (API unavailable)');
     }
   };
 

@@ -1,46 +1,123 @@
-# Getting Started with Create React App
+# SafeZonePH - Community Safety & Buddy System
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+🔗 **Live Website:** [https://safezoneph-app.vercel.app](https://safezoneph-app.vercel.app)
 
-## Available Scripts
+## 📱 Simple Walkthrough
 
-In the project directory, you can run:
+### Getting Started
+1. **Visit the Website** - Open [https://safezoneph-app.vercel.app](https://safezoneph-app.vercel.app)
+2. **Try the Demo Account** - Use the following credentials to explore all features:
+   - Email: `demo@safezoneph.com`
+   - Password: `demo123`
+3. **Or Create Your Account** - Click "Sign Up" to register with your own details
 
-### `npm start`
+### Main Features to Explore
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+**Dashboard** - Your control center
+- View your active buddies and check-in status
+- Monitor your Bayanihan Points and rank progress
+- Quick access to emergency hotlines and pending tasks
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+**Buddies System** - Connect with your safety network
+- Add buddies from your community
+- Perform regular wellness check-ins
+- View buddy status and recent activities
+- Send messages to stay connected
 
-### `npm test`
+**Tasks** - Complete community missions
+- Browse available tasks (wellness checks, supply delivery, etc.)
+- Track your pending and completed tasks
+- Earn Bayanihan Points for each completed task
+- Filter tasks by category, status, and priority
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+**Community Hub** - Engage with your barangay
+- Volunteer for community tasks
+- Request help when needed
+- View emergency alerts in your area
+- Access the SOS emergency button for urgent situations
 
-### `npm run build`
+**Chat** - Stay in touch
+- Message your buddies directly
+- Share check-in updates
+- Coordinate help requests and responses
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+**Points & Achievements**
+- Track your Bayanihan Points
+- View your rank progression (Bagong Kaibigan → Pinuno ng Komunidad)
+- See your points history and recent activities
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## 📋 Project Overview
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+**SafeZonePH** is a community-driven safety and buddy system platform designed to help Filipinos look after each other, especially during emergencies and natural disasters. The platform connects neighbors and community members through a buddy system, enabling regular check-ins, task coordination, and rapid emergency response.
 
-### `npm run eject`
+### Key Features:
+- **Buddy System** - Pair with community members for mutual safety monitoring
+- **Check-In System** - Regular wellness checks and status updates
+- **Task Management** - Coordinate community assistance and relief operations
+- **Emergency Response** - Quick SOS alerts and help request system
+- **Points & Gamification** - Earn Bayanihan Points for community contributions
+- **Real-time Chat** - Direct messaging with your safety network
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+## 🛠️ Technologies Used
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Frontend
+- **React** - UI framework with TypeScript
+- **Tailwind CSS** - Utility-first styling
+- **Zustand** - State management
+- **React Router** - Navigation and routing
+- **Lucide React** - Icon library
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+### Backend
+- **FastAPI** - Python web framework
+- **SQLAlchemy** - Database ORM
+- **JWT** - Authentication
+- **Python Jose** - JWT token handling
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+### Deployment & Tools
+- **Vercel** - Hosting and deployment
+- **Git** - Version control
+- **npm** - Package management
+- **ESLint & Prettier** - Code quality tools
 
-## Learn More
+## 👥 Development Team
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+- **Eliesha Mae L. Francisco**
+- **Jian Kyle Hornales**
+- **Osyris Benedict Fajardo**
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## 🚀 Local Development
+
+### Prerequisites
+- Node.js (v16 or higher)
+- npm or yarn
+- Python 3.8+ (for backend)
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/LuAnstrm/safezone.ph.git
+cd safezone.ph
+
+# Install dependencies
+npm install
+
+# Start development server
+npm start
+```
+
+The app will open at [http://localhost:3000](http://localhost:3000)
+
+### Build for Production
+
+```bash
+npm run build
+```
+
+## 📝 License
+
+This project is for educational purposes.
+
+---
+
+**Built with ❤️ for the Filipino community**

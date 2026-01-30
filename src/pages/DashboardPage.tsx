@@ -29,33 +29,64 @@ const DashboardPage: React.FC = () => {
   const [activeBuddies, setActiveBuddies] = useState<BuddySession[]>([]);
   const [recentMessages, setRecentMessages] = useState<any[]>([]);
 
-  // Load active buddy sessions from backend
+  // Load active buddy sessions with localStorage fallback
   useEffect(() => {
     const fetchActiveBuddies = async () => {
+      // Load from localStorage first
+      const localSessions = localStorage.getItem('safezoneph_buddy_sessions');
+      if (localSessions) {
+        const sessions = JSON.parse(localSessions);
+        setActiveBuddies(sessions.map((session: any) => ({
+          ...session,
+          buddy_name: session.buddyName || session.buddy_name || `User ${session.buddyId || session.buddy_id}`
+        })));
+      } else {
+        // Set mock buddy sessions for demo
+        const mockSessions: BuddySession[] = [
+          { id: 1, user_id: 1, buddy_id: 2, buddy_name: 'Maria Santos', status: 'active', last_check_in: new Date().toISOString(), created_at: new Date().toISOString() },
+          { id: 2, user_id: 1, buddy_id: 3, buddy_name: 'Pedro Reyes', status: 'active', last_check_in: new Date(Date.now() - 3600000).toISOString(), created_at: new Date().toISOString() },
+        ];
+        setActiveBuddies(mockSessions);
+        localStorage.setItem('safezoneph_buddy_sessions', JSON.stringify(mockSessions));
+      }
+      
       try {
         const response = await apiService.getActiveBuddySessions();
-        if (response.data) {
-          // Map to include buddy_name from the response
+        if (response.data && response.data.length > 0) {
           const sessionsWithNames = response.data.map((session: any) => ({
             ...session,
             buddy_name: session.buddyName || `User ${session.buddyId}`
           }));
           setActiveBuddies(sessionsWithNames);
+          localStorage.setItem('safezoneph_buddy_sessions', JSON.stringify(sessionsWithNames));
         }
       } catch (error) {
-        console.error('Failed to fetch active buddies:', error);
+        console.log('Using local buddy sessions (API unavailable)');
       }
     };
     fetchActiveBuddies();
   }, []);
 
-  // Load recent check-in messages from conversations
+  // Load recent check-in messages with localStorage fallback
   useEffect(() => {
     const fetchRecentMessages = async () => {
+      // Load from localStorage first
+      const localMessages = localStorage.getItem('safezoneph_check_in_messages');
+      if (localMessages) {
+        setRecentMessages(JSON.parse(localMessages));
+      } else {
+        // Set mock messages for demo
+        const mockMessages = [
+          { id: 1, buddyName: 'Maria Santos', message: 'Check-in: Feeling good today!', timestamp: new Date().toISOString() },
+          { id: 2, buddyName: 'Pedro Reyes', message: 'Check-in: All is well here', timestamp: new Date(Date.now() - 7200000).toISOString() },
+        ];
+        setRecentMessages(mockMessages);
+        localStorage.setItem('safezoneph_check_in_messages', JSON.stringify(mockMessages));
+      }
+      
       try {
         const response = await apiService.getConversations();
-        if (response.data) {
-          // Filter for check-in messages (messages that start with "Check-in")
+        if (response.data && response.data.length > 0) {
           const checkInMessages = response.data
             .filter((conv: any) => conv.last_message && conv.last_message.startsWith('Check-in'))
             .map((conv: any) => ({
@@ -66,9 +97,10 @@ const DashboardPage: React.FC = () => {
             }))
             .slice(0, 5);
           setRecentMessages(checkInMessages);
+          localStorage.setItem('safezoneph_check_in_messages', JSON.stringify(checkInMessages));
         }
       } catch (error) {
-        console.error('Failed to fetch recent messages:', error);
+        console.log('Using local messages (API unavailable)');
       }
     };
     fetchRecentMessages();

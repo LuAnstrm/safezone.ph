@@ -10,6 +10,7 @@ from mangum import Mangum
 import os
 import hashlib
 import secrets
+import json
 from typing import Optional
 
 # Database Configuration
@@ -117,6 +118,38 @@ class CommunityTask(Base):
 
 # Create tables
 Base.metadata.create_all(bind=engine)
+
+# Auto-create demo user on startup
+def init_demo_user():
+    db = SessionLocal()
+    try:
+        demo_email = "demo@safezoneph.com"
+        demo_password = "demo123"
+        
+        existing_user = db.query(User).filter(User.email == demo_email).first()
+        if not existing_user:
+            demo_user = User(
+                email=demo_email,
+                hashed_password=hashlib.sha256(demo_password.encode()).hexdigest(),
+                first_name="Demo",
+                last_name="User",
+                phone="+63 912 345 6789",
+                barangay="Sample Barangay",
+                city="Manila",
+                location="Manila, Philippines",
+                bio="This is a demo account for testing SafeZonePH features.",
+                points=500,
+                rank="Bantay Kaibigan",
+                is_verified=True
+            )
+            db.add(demo_user)
+            db.commit()
+    except Exception as e:
+        print(f"Demo user init error: {e}")
+    finally:
+        db.close()
+
+init_demo_user()
 
 # Pydantic Models
 class RegisterRequest(BaseModel):
@@ -754,6 +787,51 @@ def seed_community_tasks(db: Session = Depends(get_db)):
 
     db.commit()
     return {"message": f"Successfully created {len(initial_tasks)} community tasks"}
+
+@app.post("/api/seed-demo-user")
+def seed_demo_user(db: Session = Depends(get_db)):
+    """Create demo account if it doesn't exist"""
+    demo_email = "demo@safezoneph.com"
+    demo_password = "demo123"
+    
+    existing_user = db.query(User).filter(User.email == demo_email).first()
+    if existing_user:
+        return {"message": "Demo user already exists", "email": demo_email}
+    
+    demo_user = User(
+        email=demo_email,
+        hashed_password=hash_password(demo_password),
+        first_name="Demo",
+        last_name="User",
+        phone="+63 912 345 6789",
+        barangay="Sample Barangay",
+        city="Manila",
+        location="Manila, Philippines",
+        bio="This is a demo account for testing SafeZonePH features.",
+        points=500,
+        rank="Bantay Kaibigan",
+        is_verified=True
+    )
+    
+    db.add(demo_user)
+    db.commit()
+    db.refresh(demo_user)
+    
+    # Add welcome points history
+    points_entry = PointsHistory(
+        user_id=demo_user.id,
+        type="earned",
+        description="Welcome bonus for demo account",
+        points=500
+    )
+    db.add(points_entry)
+    db.commit()
+    
+    return {
+        "message": "Demo user created successfully",
+        "email": demo_email,
+        "password": demo_password
+    }
 
 # Vercel serverless handler
 handler = Mangum(app)
